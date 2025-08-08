@@ -21,33 +21,44 @@ app.post('/api/send', (req, res) => {
   if (typeof text === 'undefined') {
     // Initial page load: pick and store a random key and move
     const moveKeys = Object.keys(pokemonMoves);
-    currentMoveKey = moveKeys[Math.floor(Math.random() * moveKeys.length)];
-    console.log('Initial move key:', currentMoveKey);
-    const moveArray = pokemonMoves[currentMoveKey];
-    // Pick a random move not in previousMoves that reduces the pool
-    let move;
-    let previousPool = Object.keys(pokemonMoves);
-    let foundReducingMove = false;
-    for (let candidate of moveArray) {
-      const testMoves = [candidate];
-      const newPool = previousPool.filter(key => testMoves.every(m => pokemonMoves[key].includes(m)));
-      if (newPool.length < previousPool.length) {
-        move = candidate;
-        foundReducingMove = true;
+    let foundValidInitialMove = false;
+    let attempts = 0;
+    while (!foundValidInitialMove && attempts < 1000) {
+      attempts++;
+      currentMoveKey = moveKeys[Math.floor(Math.random() * moveKeys.length)];
+      const moveArray = pokemonMoves[currentMoveKey];
+      let move;
+      let previousPool = Object.keys(pokemonMoves);
+      let foundReducingMove = false;
+      for (let candidate of moveArray) {
+        const testMoves = [candidate];
+        const newPool = previousPool.filter(key => testMoves.every(m => pokemonMoves[key].includes(m)));
+        if (newPool.length < previousPool.length) {
+          move = candidate;
+          foundReducingMove = true;
+          break;
+        }
+      }
+      if (!foundReducingMove && moveArray.length > 0) {
+        // fallback: pick any move
+        move = moveArray[Math.floor(Math.random() * moveArray.length)];
+      }
+      previousMoves = [move];
+      currentRandomMove = move;
+      // Find all keys whose values contain all previousMoves
+      const matchingKeys = Object.keys(pokemonMoves).filter(key => previousMoves.every(m => pokemonMoves[key].includes(m)));
+      if (matchingKeys.length >= 600) {
+        foundValidInitialMove = true;
+        const matchingPokemon = matchingKeys.map(key => key);
+        const count = matchingPokemon.length;
+        res.json({ move: currentRandomMove, count, pokemon: matchingPokemon });
         break;
       }
+      // else, try again
     }
-    if (!foundReducingMove && moveArray.length > 0) {
-      // fallback: pick any move
-      move = moveArray[Math.floor(Math.random() * moveArray.length)];
+    if (!foundValidInitialMove) {
+      res.status(500).json({ error: 'Could not find a valid initial move with at least 600 Pokémon.' });
     }
-    previousMoves = [move];
-    currentRandomMove = move;
-    // Find all keys whose values contain all previousMoves
-    const matchingKeys = Object.keys(pokemonMoves).filter(key => previousMoves.every(m => pokemonMoves[key].includes(m)));
-    const matchingPokemon = matchingKeys.map(key => key);
-    const count = matchingPokemon.length;
-    res.json({ move: currentRandomMove, count, pokemon: matchingPokemon });
   } else {
     // User submitted a guess: check if the guess is correct, then pick another move
     if (currentMoveKey) {

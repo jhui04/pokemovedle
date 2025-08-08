@@ -8,6 +8,14 @@ function App() {
   const [status, setStatus] = useState("");
   const [moveRows, setMoveRows] = useState([]);
   const [endMessage, setEndMessage] = useState("");
+  const [giveUpMessage, setGiveUpMessage] = useState("");
+  const handleGiveUp = () => {
+    if (moveRows.length > 0 && moveRows[0]?.pokemon?.[0]) {
+      setGiveUpMessage(`The Pokémon was: ${moveRows[0].pokemon[0]}`);
+    } else {
+      setGiveUpMessage("No Pokémon to reveal.");
+    }
+  };
 
   useEffect(() => {
     const fetchRandomMove = async () => {
@@ -117,6 +125,11 @@ function App() {
             {endMessage}
           </div>
         )}
+        {giveUpMessage && (
+          <div className="giveup-message" style={{ color: 'orange', fontWeight: 'bold', marginBottom: '1em' }}>
+            {giveUpMessage}
+          </div>
+        )}
         {moveRows && moveRows.length > 0 && (
           <table className="random-move-table">
             <thead>
@@ -166,6 +179,9 @@ function App() {
           />
           <button onClick={sendToBackend} className="random-move-button">
             Send
+          </button>
+          <button onClick={handleGiveUp} className="giveup-button" style={{ backgroundColor: 'orange', color: 'white', fontWeight: 'bold', padding: '0.5em 1em', border: 'none', borderRadius: '4px' }}>
+            Give Up
           </button>
           <datalist id="pokemon-autocomplete">
             {autocompleteOptions.map((option, idx) => (
