@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     const fetchRandomMove = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/send", {
+        const response = await fetch("https://justinhui.dev/api/send", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -56,7 +56,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/api/autocomplete?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://justinhui.dev/api/autocomplete?query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         // Filter out previous guesses
@@ -75,7 +75,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:3001/api/send", {
+      const response = await fetch("https://justinhui.dev/api/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
