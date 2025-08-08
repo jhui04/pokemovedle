@@ -126,6 +126,6 @@ app.get('/api/autocomplete', (req, res) => {
   res.json({ options });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Backend server running on port ${PORT} (0.0.0.0)`);
 });
